@@ -4,7 +4,8 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using GameMapNS;
-using CharacterNS;
+using GamePieceNS;
+using GamePieceNS.CharacterNS;
 
 namespace Tests.GameMapNS_Tests
 {
@@ -101,7 +102,7 @@ namespace Tests.GameMapNS_Tests
         [Test]
         public void GetsGridAreaAtWorldPosition_Square()
         {
-            GridArea gridArea = gameMap.GetGridAreaAtWorldPosition(CharacterSizeType.Odd, new Vector3(GridArea.SQUARE_HALFWIDTH, GridArea.SQUARE_HALFHEIGHT, 0));
+            GridArea gridArea = gameMap.GetGridAreaAtWorldPosition(GamePieceSizeType.Odd, new Vector3(GridArea.SQUARE_HALFWIDTH, GridArea.SQUARE_HALFHEIGHT, 0));
             Assert.AreEqual(typeof(Square), gridArea.GetType());
         }
 
@@ -110,7 +111,7 @@ namespace Tests.GameMapNS_Tests
         [Test]
         public void GetsGridAreaAtWorldPosition_Intersection()
         {
-            GridArea gridArea = gameMap.GetGridAreaAtWorldPosition(CharacterSizeType.Even, new Vector3(GridArea.SQUARE_HALFWIDTH, GridArea.SQUARE_HALFHEIGHT, 0));
+            GridArea gridArea = gameMap.GetGridAreaAtWorldPosition(GamePieceSizeType.Even, new Vector3(GridArea.SQUARE_HALFWIDTH, GridArea.SQUARE_HALFHEIGHT, 0));
             Assert.AreEqual(typeof(Intersection), gridArea.GetType());
         }
 

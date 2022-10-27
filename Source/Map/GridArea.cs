@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 using GameMapNS;
 
 public abstract class GridArea

@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameMapNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
+using UnityEngine.U2D;
 
 namespace PlayerNS.PlayerStateNS
 {
@@ -15,6 +16,7 @@ namespace PlayerNS.PlayerStateNS
         private LineRenderer attackCircle;
         public Circle attackCircleCollider { get; private set; }
         private bool updatedCircle = false;
+        public SpriteShapeController pathArrow;
 
 
         // Constructor
@@ -31,27 +33,29 @@ namespace PlayerNS.PlayerStateNS
             this.selectedCharacter = selectedCharacter;
             ResetGameMap();
             CreateAttackCircle();
+            CreateMovePathArrow();
             ClearMoveRanges();
             OutlineMoveRange();
             //Hover(Input.mousePosition);
         }
         public override void EndState(PlayerStateType playerStateType)
         {
-            gameMap.PaintGameMap();
+            gameMap.ClearActionMap();
             gameMapInputController.SetPlayerState(playerStateType, selectedCharacter);
 
             hoverGridArea = null;
             selectedCharacter = null;
             updatedCircle = false;
             ClearMoveRanges();
-            C.DestroyGameObject(attackCircle.gameObject);
+            C.DestroyGameObject(attackCircle);
+            C.DestroyGameObject(pathArrow);
         }
 
 
         // Reset game map
         private void ResetGameMap()
         {
-            gameMap.PaintGameMap();
+            gameMap.ClearActionMap();
             gameMap.PaintCharacterSelectSquares(selectedCharacter);
         }
 
@@ -121,7 +125,8 @@ namespace PlayerNS.PlayerStateNS
             {
                 path = Pathfinding.GetPath(gameMap, selectedCharacter, selectedCharacter.gridArea.coords, gridArea.coords);
                 List<Square> pathSquares = gameMap.GetSquaresForPath(path, selectedCharacter);
-                gameMap.PaintSquares(pathSquares, GameTiles.moveTile);
+                UpdateMovePathArrow(path);
+                gameMap.PaintSquares(gameMap.intersectionTilemap, path, GameTiles.moveTile);
                 gameMap.PaintCharacterSelectSquares(selectedCharacter);
                 gameMap.PaintCharacterMoveSquares(selectedCharacter, gridArea.coords);
                 UpdateAttackCircle(gridArea);
@@ -291,7 +296,7 @@ namespace PlayerNS.PlayerStateNS
                     List<Square> characterSquares = square.character.squares;
                     foreach (Square characterSquare in characterSquares)
                     {
-                        gameMap.PaintSquare(characterSquare, GameTiles.attackTile);
+                        gameMap.PaintSquare(gameMap.actionTilemap, characterSquare, GameTiles.attackTile);
                     }
                 }
             }
@@ -319,6 +324,25 @@ namespace PlayerNS.PlayerStateNS
             }
             attackCircle.loop = true;
             attackCircle.gameObject.SetActive(false);
+        }
+
+
+        // Create move path arrow
+        private void CreateMovePathArrow()
+        {
+            pathArrow = GameObject.Instantiate(Resources.Load<SpriteShapeController>("Prefabs/Path Arrow")).GetComponent<SpriteShapeController>();
+        }
+
+
+        // Update move path arrow
+        private void UpdateMovePathArrow(List<GridArea> path)
+        {
+            Spline spline = pathArrow.spline;
+            spline.Clear();
+            foreach (GridArea gridArea in path)
+            {
+                spline.InsertPointAt(0, gridArea.bounds.center);
+            }
         }
     }
 }

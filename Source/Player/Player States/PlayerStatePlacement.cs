@@ -1,4 +1,4 @@
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

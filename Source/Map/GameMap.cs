@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using CharacterNS;
+using GamePieceNS;
+using GamePieceNS.CharacterNS;
 
 namespace GameMapNS
 {
@@ -11,8 +12,10 @@ namespace GameMapNS
         // Tilemap
         public Tilemap squareTilemap;
         public Tilemap terrainTilemap;
+        public Tilemap actionTilemap;
         public Grid squareGrid;
         public Grid intersectionGrid;
+        public Tilemap intersectionTilemap;
 
         // Map tile size
         public int mapSquareWidth { get; private set; } = 10;
@@ -166,6 +169,13 @@ namespace GameMapNS
         }
 
 
+        // Get vector 3 int coords
+        public Vector3Int Vector3IntTileCoords(Vector2Int tileCoords)
+        {
+            return new Vector3Int(tileCoords.x, tileCoords.y);
+        }
+
+
         // Get square tile
         public Tile GetSquareTile(Vector2Int squareCoords)
         {
@@ -210,10 +220,46 @@ namespace GameMapNS
         }
 
 
+        // Clear action map
+        public void ClearActionMap()
+        {
+            foreach (Square square in squareCoordsDict.Values)
+            {
+                PaintSquare(actionTilemap, square, null);
+            }
+
+            foreach (Intersection intersection in intersectionDict.Values)
+            {
+                PaintSquare(intersectionTilemap, intersection.coords, null);
+            }
+        }
+
+
+        // Paint map square
+        public void PaintSquare(Square square, TileBase tile)
+        {
+            PaintSquare(square.coords, tile);
+        }
+
+
+        // Paint map square
+        public void PaintSquare(Tilemap tilemap, Square square, TileBase tile)
+        {
+            PaintSquare(tilemap, square.coords, tile);
+        }
+
+
         // Paint map square
         public void PaintSquare(Square square, Tile tile)
         {
             PaintSquare(square.coords, tile);
+        }
+
+
+        // Paint grid area
+        public void PaintGridArea(Tilemap tilemap, GridArea gridArea, Tile tile)
+        {
+            PaintSquare(tilemap, gridArea.coords, tile);
         }
 
 
@@ -227,12 +273,46 @@ namespace GameMapNS
         }
 
 
+        // Paint map squares
+        public void PaintSquares(Tilemap tilemap, List<Square> squares, Tile tile)
+        {
+            foreach (Square square in squares)
+            {
+                PaintSquare(tilemap, square, tile);
+            }
+        }
+
+
+        // Paint map squares
+        public void PaintSquares(Tilemap tilemap, List<GridArea> gridAreas, Tile tile)
+        {
+            foreach (GridArea gridArea in gridAreas)
+            {
+                PaintGridArea(tilemap, gridArea, tile);
+            }
+        }
+
+
         // Paint map square
-        public void PaintSquare(Vector2Int squareCoords, Tile tile)
+        public void PaintSquare(Vector2Int squareCoords, TileBase tile)
         {
             if (squareCoordsDict.ContainsKey(squareCoords))
             {
-                squareTilemap.SetTile(new Vector3Int(squareCoords.x, squareCoords.y, 0), tile);
+                Vector3Int tileCoords = new Vector3Int(squareCoords.x, squareCoords.y);
+                squareTilemap.SetTile(tileCoords, tile);
+                squareTilemap.RefreshTile(tileCoords);
+            }
+        }
+
+
+        // Paint map square
+        public void PaintSquare(Tilemap tilemap, Vector2Int squareCoords, TileBase tile)
+        {
+            if (squareCoordsDict.ContainsKey(squareCoords))
+            {
+                Vector3Int tileCoords = Vector3IntTileCoords(squareCoords);
+                tilemap.SetTile(tileCoords, tile);
+                tilemap.RefreshTile(tileCoords);
             }
         }
 
@@ -243,6 +323,31 @@ namespace GameMapNS
             foreach (Vector2Int coords in squareCoords)
             {
                 PaintSquare(coords, tile);
+            }
+        }
+
+
+        // Rotate square
+        public void RotateSquare(Tilemap tilemap, Vector2Int squareCoords, float rotation)
+        {
+            if (squareCoordsDict.ContainsKey(squareCoords))
+            {
+                Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, rotation), Vector3.one);
+                Vector3Int tileCoords = Vector3IntTileCoords(squareCoords);
+                tilemap.SetTransformMatrix(tileCoords, matrix);
+                tilemap.RefreshTile(tileCoords);
+            }
+        }
+
+
+        // Set square color
+        public void SetSquareColor(Tilemap tilemap, Vector2Int squareCoords, Color color)
+        {
+            if (squareCoordsDict.ContainsKey(squareCoords))
+            {
+                Vector3Int tileCoords = Vector3IntTileCoords(squareCoords);
+                tilemap.SetColor(tileCoords, color);
+                tilemap.RefreshTile(tileCoords);
             }
         }
 
@@ -310,9 +415,9 @@ namespace GameMapNS
 
 
         // Get grid area at world position
-        public GridArea GetGridAreaAtWorldPosition(CharacterSizeType sizeType, Vector3 worldPosition)
+        public GridArea GetGridAreaAtWorldPosition(GamePieceSizeType sizeType, Vector3 worldPosition)
         {
-            if (sizeType == CharacterSizeType.Even)
+            if (sizeType == GamePieceSizeType.Even)
                 return GetIntersectionAtWorldPosition(worldPosition);
             else
                 return GetSquareAtWorldPosition(worldPosition);
@@ -422,7 +527,7 @@ namespace GameMapNS
         // Get grid area for character stats
         public GridArea GetGridAreaForCharacterStats(CharacterStats stats, Vector2Int targetCoords)
         {
-            if (stats.sizeType == CharacterSizeType.Even)
+            if (stats.sizeType == GamePieceSizeType.Even)
                 return GetGridAreaAtCoords<Intersection>(targetCoords);
             else
                 return GetGridAreaAtCoords<Square>(targetCoords);
@@ -462,15 +567,17 @@ namespace GameMapNS
             List<Vector2Int> cornerCoords = character.gridArea.GetCornerCoords(character.radius);
             foreach (Vector2Int corner in cornerCoords)
             {
-                if (character.sizeType == CharacterSizeType.Even)
+                PaintSquare(actionTilemap, corner, GameTiles.actionArrow);
+                SetSquareColor(actionTilemap, corner, Color.green);
+                if (character.sizeType == GamePieceSizeType.Even)
                 {
                     Vector2Int diff = corner - character.gridArea.coords;
-                    PaintSquare(corner, GameTiles.selectTilesEvenSize[diff]);
+                    RotateSquare(actionTilemap, corner, GameTiles.selectTilesRotationEven[diff]);
                 }
                 else
                 {
                     Vector2Int diff = (corner - character.gridArea.coords) / character.radius;
-                    PaintSquare(corner, GameTiles.selectTilesOddSize[diff]);
+                    RotateSquare(actionTilemap, corner, GameTiles.selectTilesRotationOdd[diff]);
                 }
             }
         }
@@ -486,19 +593,26 @@ namespace GameMapNS
             List<Vector2Int> targetSquareCoords = targetArea.GetSquareCoords(character.radius);
             foreach (Vector2Int targetSquare in targetSquareCoords)
             {
-                if (character.sizeType == CharacterSizeType.Even)
+                if (character.sizeType == GamePieceSizeType.Even)
                 {
                     Vector2Int diff = targetSquare - targetArea.coords;
-                    PaintSquare(targetSquare, GameTiles.moveTilesEvenSize[diff]);
+                    PaintSquare(actionTilemap, targetSquare, GameTiles.actionArrow);
+                    RotateSquare(actionTilemap, targetSquare, GameTiles.selectTilesRotationEven[diff]);
                 }
                 else
                 {
                     Vector2Int diff = (targetSquare - targetArea.coords) / character.radius;
                     if (Mathf.Abs(diff.x) == Mathf.Abs(diff.y) && diff.x != 0)
-                        PaintSquare(targetSquare, GameTiles.moveTilesOddSize[diff]);
+                    {
+                        PaintSquare(actionTilemap, targetSquare, GameTiles.actionArrow);
+                        RotateSquare(actionTilemap, targetSquare, GameTiles.selectTilesRotationOdd[diff]);
+                    }
                     else
-                        PaintSquare(targetSquare, GameTiles.moveTile);
+                    {
+                        PaintSquare(actionTilemap, targetSquare, GameTiles.moveTile);
+                    }
                 }
+                SetSquareColor(actionTilemap, targetSquare, Color.yellow);
             }
         }
 
@@ -511,7 +625,7 @@ namespace GameMapNS
 
             foreach (Square square in character.squares)
             {
-                PaintSquare(square, GameTiles.attackTile);
+                PaintSquare(actionTilemap, square, GameTiles.attackTile);
             }
         }
 

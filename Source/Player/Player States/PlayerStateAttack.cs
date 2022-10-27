@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameMapNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 
 namespace PlayerNS.PlayerStateNS
 {
@@ -121,6 +121,9 @@ namespace PlayerNS.PlayerStateNS
 
             hoverPosition = worldPosition;
             Vector2 cwp = new Vector2(selectedCharacter.worldPosition.x, selectedCharacter.worldPosition.y);
+
+            // Show facing direction
+            selectedCharacter.SetFaceRight(hoverPosition.x >= cwp.x);
 
             // Get projectile information
             ProjectileInfo projInfo = selectedCharacter.projectileInfo;

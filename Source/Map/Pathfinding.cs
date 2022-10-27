@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
+using GamePieceNS;
 
 namespace GameMapNS {
     public class Pathfinding
@@ -87,7 +88,7 @@ namespace GameMapNS {
         {
             List<GridArea> maxPath = new List<GridArea>();
 
-            if (character.sizeType == CharacterSizeType.Even)
+            if (character.sizeType == GamePieceSizeType.Even)
             {
                 foreach (GridArea area in gameMap.intersectionDict.Values)
                 {

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using GameMapNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 using PlayerNS;
 
 namespace Tests.PlayerNS_Tests

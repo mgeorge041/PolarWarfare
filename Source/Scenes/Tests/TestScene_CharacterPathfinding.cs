@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using GameMapNS;
 using PlayerNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 
 public class TestScene_CharacterPathfinding : MonoBehaviour
 {

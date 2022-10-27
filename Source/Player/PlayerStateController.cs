@@ -4,7 +4,7 @@ using UnityEngine;
 using GameMapNS;
 using PlayerNS;
 using PlayerNS.PlayerStateNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 
 public class PlayerStateController
 {

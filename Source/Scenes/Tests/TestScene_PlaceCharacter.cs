@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameMapNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 using PlayerNS;
 using PlayerNS.PlayerStateNS;
 using UnityEngine.UI;

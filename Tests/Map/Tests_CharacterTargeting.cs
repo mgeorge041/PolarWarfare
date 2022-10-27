@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using GameMapNS;
 using PlayerNS;
-using CharacterNS;
+using GamePieceNS.CharacterNS;
 
 namespace Tests.ScenesNS_Tests
 {

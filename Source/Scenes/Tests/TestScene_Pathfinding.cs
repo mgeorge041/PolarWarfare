@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using GameMapNS;
 using PlayerNS;
-using CharacterNS;
+using GamePieceNS;
+using GamePieceNS.CharacterNS;
 using TMPro;
 using UnityEngine.UI;
 
@@ -123,7 +124,7 @@ public class TestScene_Pathfinding : MonoBehaviour
         hoverGridArea = gridArea;
         List<GridArea> path = Pathfinding.GetPath(gameMap, character, character.gridArea.coords, gridArea.coords);
 
-        if (character.sizeType == CharacterSizeType.Even)
+        if (character.sizeType == GamePieceSizeType.Even)
         {
             foreach (Intersection intersection in intersectionLabels.Keys)
             {
